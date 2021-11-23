@@ -17,9 +17,9 @@ public class MainService extends Service {
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"messages")
-                    .setContentText("This is running in Background")
-                    .setContentTitle("Flutter Background")
-                    .setSmallIcon(R.drawable.like)
+                    .setContentText("Running in Background")
+                    .setContentTitle("Background Process")
+                    .setSmallIcon(R.drawable.bluelab)
                     ;
 
             startForeground(101,builder.build());

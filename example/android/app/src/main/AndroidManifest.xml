@@ -7,10 +7,10 @@
          FlutterApplication and put your custom class here. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <application
-        android:name=".MyApplication"
+        android:name=".MainApplication"
         android:label="plugin_noti_example"
         android:icon="@mipmap/ic_launcher">
-        <service android:name=".MyService" android:exported="true" android:enabled="true"/>
+        <service android:name=".MainService" android:exported="true" android:enabled="true"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

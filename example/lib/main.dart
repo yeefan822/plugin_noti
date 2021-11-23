@@ -41,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
       color: Colors.white,
       child: Center(
         child: RaisedButton(
-            child: Text("Start Background"),
+            child: Text("Start Background Service"),
             onPressed: (){
               startServiceInPlatform();
             }
