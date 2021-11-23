@@ -5,6 +5,10 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.RequiresApi;
+import java.util.Calendar;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
@@ -31,6 +35,12 @@ public class MainActivity extends FlutterActivity {
                         if(methodCall.method.equals("startService")){
                             startService();
                             result.success("Service Started");
+                        }else if (methodCall.method.equals("startTiming")){
+                            Date currentTime = Calendar.getInstance().getTime();
+                            DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+                            result.success(dateFormat.format(currentTime));
+
+
                         }
                     }
                 });

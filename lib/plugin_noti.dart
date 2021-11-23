@@ -15,4 +15,9 @@ class PluginNoti {
     final String data = await _channel.invokeMethod('startService');
     return data;
   }
+  static Future<String> get startTiming async {
+    final String data = await _channel.invokeMethod('startTiming');
+    return data;
+  }
+
 }
