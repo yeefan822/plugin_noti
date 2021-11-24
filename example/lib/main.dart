@@ -4,31 +4,18 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:plugin_noti/plugin_noti.dart';
+import 'package:plugin_noti/db.dart';
 import 'dart:async';
 
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-void main() async {
+Future <void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   // Open the database and store the reference.
 
-  final database = openDatabase(
-    // Set the path to the database. Note: Using the `join` function from the
-    // `path` package is best practice to ensure the path is correctly
-    // constructed for each platform.
-    join(await getDatabasesPath(), 'time_database.db'),
-    // When the database is first created, create a table to store dogs.
-    onCreate: (db, version) {
-      // Run the CREATE TABLE statement on the database.
-      return db.execute(
-        'CREATE TABLE times(id INTEGER PRIMARY KEY, name TEXT)',
-      );
-    },
-    // Set the version. This executes the onCreate function and provides a
-    // path to perform database upgrades and downgrades.
-    version: 1,
-  );
+
 
  runApp(MyApp());
 }
@@ -73,19 +60,23 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Timer timer;
   bool started=false;
+  int count=0;
 
 
 
   @override
-  void initState() {
+   initState() {
     super.initState();
+
     timer = Timer.periodic(Duration(seconds: 15), (Timer t) => startIfTrue());
   }
+
   void startIfTrue() {
     if(started==true){
       startTimingInAndroid();
     }
   }
+
 
   void turnOnTiming(){
     started=true;
@@ -98,9 +89,23 @@ class _MyHomePageState extends State<MyHomePage> {
     if(Platform.isAndroid){
       debugPrint('Trying to start timing.');
       String data = await PluginNoti.startTiming;
-      debugPrint(data);
+      await commitToDatabase(count, data);
+      count++;
 
     }
+  }
+  Future<void> cleanUpDatabase() async{
+    var db= await DB.instance.database;
+    db.rawDelete("delete * from times;");
+  }
+  Future<void> commitToDatabase(int id,String detail) async {
+    var db = await DB.instance.database;
+    String sql = "insert into times (id, detail) values (?, ?)";
+    db.rawInsert(sql,[id,detail]);
+    var result = await db.rawQuery("select * from times;");
+    debugPrint(result.toString());
+
+
   }
   void startServiceInAndroid() async {
     if(Platform.isAndroid){
@@ -131,7 +136,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   turnOnTiming();
                 }
 
-            ),])),
+            ),
+            RaisedButton(
+                child: Text("Clean up database"),
+                onPressed: (){
+                  cleanUpDatabase();
+                }
+
+            )])),
       ),
     );
   }

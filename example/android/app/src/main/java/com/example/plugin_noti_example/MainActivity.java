@@ -15,6 +15,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugins.GeneratedPluginRegistrant;
+import com.tekartik.sqflite.SqflitePlugin;
 
 public class MainActivity extends FlutterActivity {
 
@@ -25,6 +26,7 @@ public class MainActivity extends FlutterActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         GeneratedPluginRegistrant.registerWith(new FlutterEngine(this));
+        SqflitePlugin.registerWith(registrarFor("com.tekartik.sqflite.SqflitePlugin"));
 
         forService = new Intent(MainActivity.this,MainService.class);
 
@@ -37,7 +39,7 @@ public class MainActivity extends FlutterActivity {
                             result.success("Service Started");
                         }else if (methodCall.method.equals("startTiming")){
                             Date currentTime = Calendar.getInstance().getTime();
-                            DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+                            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
                             result.success(dateFormat.format(currentTime));
 
 
