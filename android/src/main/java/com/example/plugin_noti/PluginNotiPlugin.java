@@ -18,6 +18,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import io.flutter.plugin.common.PluginRegistry;
 
 /** PluginNotiPlugin */
 @RequiresApi(api = Build.VERSION_CODES.O)
@@ -30,7 +31,9 @@ public class PluginNotiPlugin extends FlutterActivity implements FlutterPlugin, 
   private Activity activity;
   private Intent forService;
 
+  public static void registerWith(PluginRegistry.Registrar registrar) {
 
+  }
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
     channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "plugin_noti");

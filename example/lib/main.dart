@@ -9,6 +9,8 @@ import 'dart:async';
 
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:plugin_noti/streams_channel.dart';
+
 
 Future <void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +21,7 @@ Future <void> main() async {
 
  runApp(MyApp());
 }
-
+final StreamsChannel streamsChannel = StreamsChannel('streams_channel_example');
 class MyApp extends StatelessWidget {
 
   @override
@@ -57,18 +59,32 @@ class Time {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
+  StreamSubscription<dynamic> _subscriptionA;
+  StreamSubscription<dynamic> _subscriptionB;
   Timer timer;
   bool started=false;
   int count=0;
-
+  String _chargingStatus = 'Battery status: unknown.';
+  final StreamsChannel streamsChannel = StreamsChannel('streams_channel_example');
+  static const EventChannel eventChannel = EventChannel('samples.flutter.io/charging');
 
 
   @override
    initState() {
     super.initState();
+    timer = Timer.periodic(Duration(seconds: 10), (Timer t) => startIfTrue());
+    eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onError);
 
-    timer = Timer.periodic(Duration(seconds: 15), (Timer t) => startIfTrue());
+  }
+  void _onEvent(Object event) {
+    debugPrint(event.toString());
+  }
+
+  void _onError(Object error) {
+    setState(() {
+      PlatformException exception = error;
+      _chargingStatus = exception?.message ?? 'Battery status: unknown.';
+    });
   }
 
   void startIfTrue() {
@@ -115,7 +131,39 @@ class _MyHomePageState extends State<MyHomePage> {
       debugPrint(data);
     }
   }
+  void _start(bool a) {
+    // ignore: cancel_subscriptions
+    StreamSubscription<dynamic> subscription =
+    a ? _subscriptionA : _subscriptionB;
 
+    if (subscription != null) {
+      subscription.cancel();
+      subscription = null;
+    } else {
+      final streamId = 'Stream ${a ? 'A' : 'B'}';
+      subscription = streamsChannel
+          .receiveBroadcastStream(streamId)
+          .listen((data) => debugPrint('Received from $streamId: $data'));
+
+      subscription.onDone(() {
+        setState(() {
+          if (a) {
+            _subscriptionA = null;
+          } else {
+            _subscriptionB = null;
+          }
+        });
+      });
+    }
+
+    setState(() {
+      if (a) {
+        _subscriptionA = subscription;
+      } else {
+        _subscriptionB = subscription;
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -123,6 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Center(
         child: Container(
           child:Column( children: <Widget>[
+            Spacer(),
             RaisedButton(
                 child: Text("Start Background Service"),
                 onPressed: (){
@@ -130,12 +179,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
 
             ),
+
             RaisedButton(
                 child: Text("Start Timing Service"),
                 onPressed: (){
                   turnOnTiming();
+                  startIfTrue();
                 }
 
+            ),
+            RaisedButton(
+              onPressed: () => _start(false),
+              child: Text(_subscriptionB != null ? 'Stop B' : 'Start B'),
             ),
             RaisedButton(
                 child: Text("Clean up database"),
